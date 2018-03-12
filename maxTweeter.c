@@ -42,11 +42,16 @@ int getcol(char *line)
         const char* str;
         char colname[7]="\"name\"\0";
         str=strtok(line,",");
-        if(strcmp(str, "\"\"")!=0){
+        if(str ==NULL || strcmp(str, "\"\"")!=0 ){
                 printf("Input format error\n");
                 return -1;
                 }
         for(;;str=strtok(NULL, ",\n")){
+
+                if(str == NULL){
+                    printf("Input format error\n");
+                    exit(-1);
+                }
                 if(strstr(str,colname)!=NULL){
                     if( strcmp(strstr(str,colname),colname) == 0 && strcmp(str,colname)!=0){
                         printf("Input format error\n");
@@ -74,7 +79,7 @@ const char * getfield(char * line, int count)
                         return str;
         }
         return NULL;
-}*/
+}
 
 
 void sortList(struct Tweeter **tweetList){
@@ -115,19 +120,29 @@ int main( int argc, char *argv[] )  {
     else{
 
         fseek (fd, 0, SEEK_END);
-        long fileSize = ftell(file);
+        long fileSize = ftell(fd);
 
         if (0 == fileSize)
         {
             printf("Invalid Input Format\n");
             return -1;
         }
-        fseek(file, 0, SEEK_SET);
+        fseek(fd, 0, SEEK_SET);
         // if we can read the file, get the data.
         struct Tweeter *tweeters= NULL;
         char * line = (char *)malloc(sizeof(char) * 1024);
         // Get the column that contains the name.
         fgets(line, 1024, fd);
+        if(line == NULL){
+                    printf("Invalid Input Format\n");
+                    return -1;
+        }
+        char * test = line;
+        int testlen = strlen(test);
+        if(testlen == 0){
+            printf("Invalid Input Format\n");
+            return -1;
+        }
         int name_col = getcol(line);
         if(name_col != -1){
             int numLines = 1;
@@ -138,18 +153,18 @@ int main( int argc, char *argv[] )  {
                 numLines++;
                 char * name = (char *)malloc(sizeof(char) * 100);
                 int num = strlen(line);
-                /*for(int i = 0; i < num; i++){
-                    char myChr  = *line;
-                    if(myChr == NULL){
-                        printf("TRUE");
-                    }
-                    else{
 
-                    }
-                    myChr = myChr + 1;
-                }*/
                 char * field = getfield(line, name_col);
-                numLines++;
+                if(field == NULL){
+                    printf("Invalid Input Format\n");
+                    return -1;
+                }
+                test = line;
+                testlen = strlen(test);
+                if(testlen == 0){
+                    printf("Invalid Input Format\n");
+                    return -1;
+                }
                 if(sizeof(field) > sizeof(char) * 100 || numLines > 20000)
                     return -1;
                 //printf(field);
